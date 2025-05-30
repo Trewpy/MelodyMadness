@@ -1,0 +1,13 @@
+com\melodymadness\game\FinalProject.class
+com\melodymadness\game\model\TestScoring.class
+com\melodymadness\game\model\Lane.class
+com\melodymadness\game\model\HitData.class
+com\melodymadness\game\ui\GameOverScene.class
+com\melodymadness\game\ui\StartScene.class
+com\melodymadness\game\ui\GamePlayScene.class
+com\melodymadness\game\ui\GameApp.class
+com\melodymadness\game\model\SongRecorder$1.class
+com\melodymadness\game\model\SongRecorder.class
+com\melodymadness\game\model\Note.class
+com\melodymadness\game\ui\SongMenuScene.class
+com\melodymadness\game\model\Song.class
