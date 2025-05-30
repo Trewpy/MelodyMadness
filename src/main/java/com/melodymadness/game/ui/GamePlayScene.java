@@ -7,10 +7,12 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -26,7 +28,9 @@ public class GamePlayScene {
     private final Scene scene;
     private final Song song;
     private final String songPath;
-    private static final double HIT_BAR_Y = 750;
+    private final int hitY = 750;
+    private int score = 0;
+    private Label scoreLabel;
 
     public GamePlayScene(Stage stage, String songPath) {
         this.songPath = songPath;
@@ -39,7 +43,28 @@ public class GamePlayScene {
         title.setLayoutY(20);
         root.getChildren().add(title);
 
-        // Load song file
+        scoreLabel = new Label("Score: 0");
+        scoreLabel.setLayoutX(20);
+        scoreLabel.setLayoutY(50);
+        root.getChildren().add(scoreLabel);
+
+        // Draw lane lines
+        for (int i = 0; i < 4; i++) {
+            Line laneLine = new Line();
+            laneLine.setStartX(laneToX(i) + 25);
+            laneLine.setStartY(0);
+            laneLine.setEndX(laneToX(i) + 25);
+            laneLine.setEndY(800);
+            laneLine.setStroke(Color.GRAY);
+            root.getChildren().add(laneLine);
+        }
+
+        // Draw hit bar
+        Line hitBar = new Line(0, hitY + 20, 600, hitY + 20);
+        hitBar.setStroke(Color.RED);
+        hitBar.setStrokeWidth(3);
+        root.getChildren().add(hitBar);
+
         try {
             InputStream inputStream = getClass().getResourceAsStream(songPath);
             if (inputStream == null) {
@@ -56,22 +81,7 @@ public class GamePlayScene {
             return;
         }
 
-        // Draw red hit bar (stationary)
-        Rectangle hitBar = new Rectangle(0, HIT_BAR_Y, 600, 5);
-        hitBar.setFill(Color.RED);
-        hitBar.setId("static");
-        root.getChildren().add(hitBar);
-
-        // Draw vertical lane lines (stationary)
-        for (int i = 0; i < 4; i++) {
-            double x = laneToX(i);
-            Rectangle laneLine = new Rectangle(x, 0, 2, 800);
-            laneLine.setFill(Color.GRAY);
-            laneLine.setId("static");
-            root.getChildren().add(laneLine);
-        }
-
-        // ✅ Play background music
+        // ✅ Play background music (based on songPath)
         try {
             String musicFileName = switch (songPath) {
                 case "/songs/safeandsoundtest.txt" -> "/music/safeandsound.mp3";
@@ -108,6 +118,7 @@ public class GamePlayScene {
                 noteRect.setX(laneToX(note.getLane()));
                 noteRect.setY(0);
                 noteRect.setFill(Color.DEEPSKYBLUE);
+                noteRect.setUserData(note);
                 root.getChildren().add(noteRect);
                 System.out.println("Spawned note at lane " + note.getLane() + " @ " + finalSpawnTime + "s");
             });
@@ -115,29 +126,40 @@ public class GamePlayScene {
             spawnTimeline.getKeyFrames().add(spawnFrame);
         }
 
-        // Animate notes downward (skip static elements)
+        // Animate note fall
         Timeline animationTimeline = new Timeline(
                 new KeyFrame(Duration.millis(16), e -> {
                     for (var node : root.getChildren()) {
-                        if (node instanceof Rectangle rect && !"static".equals(rect.getId())) {
+                        if (node instanceof Rectangle rect) {
                             rect.setY(rect.getY() + 2);
                         }
                     }
                 }));
         animationTimeline.setCycleCount(Animation.INDEFINITE);
 
-        // End the game after all notes fall
+        // Handle key press
+        scene.setOnKeyPressed(event -> {
+            KeyCode code = event.getCode();
+            if (code == KeyCode.D)
+                checkHit(0);
+            if (code == KeyCode.F)
+                checkHit(1);
+            if (code == KeyCode.J)
+                checkHit(2);
+            if (code == KeyCode.K)
+                checkHit(3);
+        });
+
+        // Delay before game over
         double lastHitTime = song.getAllNotes().stream()
                 .mapToDouble(Note::getHitTime)
                 .max()
                 .orElse(0);
-
         double gameOverTime = lastHitTime + 7.0;
 
         Timeline endTimeline = new Timeline(
                 new KeyFrame(Duration.seconds(gameOverTime), e -> {
-                    int finalScore = 1234; // Placeholder for actual score
-                    Scene gameOverScene = GameOverScene.createGameOverScene(stage, finalScore, songPath);
+                    Scene gameOverScene = GameOverScene.createGameOverScene(stage, score, songPath);
                     stage.setScene(gameOverScene);
                 }));
         endTimeline.play();
@@ -148,11 +170,31 @@ public class GamePlayScene {
         animationTimeline.play();
     }
 
-    public Scene getScene() {
-        return scene;
+    private void checkHit(int lane) {
+        double tolerance = 30;
+
+        for (int i = 0; i < root.getChildren().size(); i++) {
+            var node = root.getChildren().get(i);
+            if (node instanceof Rectangle rect) {
+                Note note = (Note) rect.getUserData();
+                if (note != null && note.getLane() == lane) {
+                    double noteY = rect.getY();
+                    if (Math.abs(noteY - hitY) <= tolerance) {
+                        root.getChildren().remove(rect);
+                        score += 100;
+                        scoreLabel.setText("Score: " + score);
+                        return;
+                    }
+                }
+            }
+        }
     }
 
     private double laneToX(int lane) {
         return 100 + lane * 100;
+    }
+
+    public Scene getScene() {
+        return scene;
     }
 }
