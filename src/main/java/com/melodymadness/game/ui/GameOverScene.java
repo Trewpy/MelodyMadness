@@ -13,20 +13,20 @@ public class GameOverScene {
         VBox root = new VBox(20);
         root.setAlignment(Pos.CENTER);
 
-        Label title = new Label("🎵 Game Over 🎵");
+        Label title = new Label("Game Over");
         title.setStyle("-fx-font-size: 32px;");
 
         Label scoreLabel = new Label("Your Score: " + score);
         scoreLabel.setStyle("-fx-font-size: 24px;");
 
-        // 🔁 Replay the same song
+        // Replay the same song
         Button replayButton = new Button("Replay");
         replayButton.setOnAction(e -> {
             GamePlayScene game = new GamePlayScene(primaryStage, songPath);
             primaryStage.setScene(game.getScene());
         });
 
-        // 🏠 Return to menu
+        // Return to menu
         Button menuButton = new Button("Return to Menu");
         menuButton.setOnAction(e -> {
             Scene menu = SongMenuScene.createMenuScene(primaryStage);

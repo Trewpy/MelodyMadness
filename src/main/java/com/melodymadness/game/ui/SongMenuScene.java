@@ -26,12 +26,12 @@ public class SongMenuScene {
                 title.setFont(customFont);
             }
         } catch (Exception e) {
-            System.out.println("⚠️ Failed to load font: " + e.getMessage());
+            System.out.println("Failed to load font: " + e.getMessage());
         }
 
         root.getChildren().add(title);
 
-        // ✅ List all your available songs here
+        // List all your available songs here
         String[] songs = {
                 "safeandsoundtest.txt",
                 "test_sonicblaster.txt"

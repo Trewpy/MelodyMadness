@@ -66,11 +66,15 @@ public class Song {
     public void loadFromReader(BufferedReader reader) throws IOException {
         String line;
         while ((line = reader.readLine()) != null) {
-            String[] parts = line.trim().split(",");
-            if (parts.length == 2) {
+            String[] parts = line.trim().split("[,\\s]+"); // supports space or comma
+            if (parts.length >= 2) {
                 int lane = Integer.parseInt(parts[0]);
                 double time = Double.parseDouble(parts[1]);
-                Note note = new Note(lane, time, false);
+                boolean isLong = false;
+                if (parts.length >= 3) {
+                    isLong = Boolean.parseBoolean(parts[2]);
+                }
+                Note note = new Note(lane, time, isLong);
                 addNote(note);
             }
         }

@@ -81,7 +81,6 @@ public class GamePlayScene {
             return;
         }
 
-        // ✅ Play background music (based on songPath)
         try {
             String musicFileName = switch (songPath) {
                 case "/songs/safeandsoundtest.txt" -> "/music/safeandsound.mp3";
@@ -96,13 +95,13 @@ public class GamePlayScene {
                     MediaPlayer mediaPlayer = new MediaPlayer(media);
                     mediaPlayer.play();
                 } else {
-                    System.out.println("⚠️ Music file not found: " + musicFileName);
+                    System.out.println(" Music file not found: " + musicFileName);
                 }
             } else {
-                System.out.println("⚠️ No music mapping for song path: " + songPath);
+                System.out.println(" No music mapping for song path: " + songPath);
             }
         } catch (Exception e) {
-            System.out.println("❌ Error playing music: " + e.getMessage());
+            System.out.println(" Error playing music: " + e.getMessage());
         }
 
         // Spawn falling notes
@@ -171,19 +170,23 @@ public class GamePlayScene {
     }
 
     private void checkHit(int lane) {
-        double tolerance = 30;
+        double tolerancePerfect = 50;
+        double toleranceGood = 150;
 
         for (int i = 0; i < root.getChildren().size(); i++) {
             var node = root.getChildren().get(i);
             if (node instanceof Rectangle rect) {
                 Note note = (Note) rect.getUserData();
-                if (note != null && note.getLane() == lane) {
+                if (note != null && note.getLane() == lane && !note.isHit()) {
                     double noteY = rect.getY();
-                    if (Math.abs(noteY - hitY) <= tolerance) {
+                    double diff = Math.abs(noteY - hitY);
+                    if (diff <= toleranceGood) {
+                        int points = diff <= tolerancePerfect ? 300 : 150;
+                        note.setHit(true);
                         root.getChildren().remove(rect);
-                        score += 100;
+                        score += points;
                         scoreLabel.setText("Score: " + score);
-                        return;
+                        return; // only hit one note
                     }
                 }
             }

@@ -4,6 +4,7 @@ public class Note {
     private int lane;
     private double hitTime;
     private boolean isLong;
+    private boolean hit = false; // NEW
 
     public Note(int lane, double hitTime, boolean isLong) {
         this.lane = lane;
@@ -26,5 +27,13 @@ public class Note {
     public boolean isHit(double keyPressTime) {
         double error = Math.abs(keyPressTime - hitTime);
         return error < 0.1;
+    }
+
+    public boolean isHit() {
+        return hit;
+    }
+
+    public void setHit(boolean hit) {
+        this.hit = hit;
     }
 }

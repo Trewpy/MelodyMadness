@@ -26,11 +26,11 @@ public class StartScene {
                 title.setFont(customFont);
             }
         } catch (Exception e) {
-            System.out.println("⚠️ Failed to load font: " + e.getMessage());
+            System.out.println(" Failed to load font: " + e.getMessage());
         }
 
         Button startButton = new Button("Start Game");
-        startButton.setOnAction(e -> startAction.run()); // ✅ Use passed-in action
+        startButton.setOnAction(e -> startAction.run()); // Use passed-in action
 
         root.getChildren().addAll(title, startButton);
         return new Scene(root, 800, 600);
